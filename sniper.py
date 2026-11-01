@@ -22,7 +22,7 @@ SEEN = os.path.join(HERE, "alerted.json")
 
 # Buyer's premium + VAT on the premium. CHECK the auction's terms and edit.
 BUYER_PREMIUM = 0.15
-VAT = 0.21
+VAT = 0.0  # you reclaim the VAT as a business buyer, so it is not a cost (set 0.21 if you can't)
 OVERHEAD = BUYER_PREMIUM * (1 + VAT)  # extra cost on top of the hammer price
 # You want to pay at most this share of the used resale value, all costs in.
 TARGET_SHARE = 0.75
@@ -426,7 +426,7 @@ def build_page(rows):
                  value=r["value"], max=r["max_bid"], end=r["end"], spec=html.escape(r["spec"]),
                  src=html.escape(r["src"]), conf=r["conf"], warn=html.escape((r["warn"] or "")[:160]))
             for r in rows if r["ratio"] is not None]
-    meta = (f"bijgewerkt {dt.datetime.now():%d-%m %H:%M} · kosten = bod + {BUYER_PREMIUM:.0%} premie + btw "
+    meta = (f"bijgewerkt {dt.datetime.now():%d-%m %H:%M} · kosten = bod + {BUYER_PREMIUM:.0%} opgeld, excl. btw "
             f"· waarde = Marktplaats mediaan x{HAGGLE}")
     return (PAGE.replace("__META__", html.escape(meta))
             .replace("__ROWS__", json.dumps(data).replace("</", "<\\/")))
