@@ -544,7 +544,8 @@ def digest_gap(soonest):
     return 3 * 3600
 
 
-def notify(rows, window_h, top_n=6):
+def notify(rows, window_h, each_run=False, top_n=6):
+    """each_run: the scheduler decides the cadence, so every run sends one digest and nothing else."""
     seen = load_json(SEEN, {})
     now = time.time()
     live = [r for r in rows if r["ratio"] is not None and r["conf"] not in ("low", "none")
@@ -553,16 +554,19 @@ def notify(rows, window_h, top_n=6):
         return
     soonest = min(r["end"] for r in live) - now
     quiet = dt.datetime.now().hour < 7 and soonest > 6 * 3600
-    if not quiet and now - seen.get("_digest", 0) >= digest_gap(soonest):
+    if each_run or (not quiet and now - seen.get("_digest", 0) >= digest_gap(soonest)):
         good = sorted((r for r in live if r["bid"] < r["max_bid"]), key=lambda r: -r["margin"])[:top_n]
         if good:
             push(f"🔥 Top {len(good)} deals · eerste sluit over {nl_left(soonest)}",
                  "\n\n".join(block(r, now) for r in good), link(good[0]["lot"]),
                  actions=[(f"#{lot_no(r)}", link(r["lot"])) for r in good])
-        elif soonest < 24 * 3600:
+        elif each_run or soonest < 24 * 3600:
             push("Geen deals onder je max bod", f"Nog {len(live)} lots open, alles is nu te duur.",
                  link(live[0]["lot"]))
         seen["_digest"] = now
+    if each_run:
+        save_json(SEEN, seen)
+        return
     # one push per lot, 60 and 15 minutes before it closes, while it is still under your max bid
     for r in sorted(live, key=lambda r: r["end"]):
         l = r["lot"]
@@ -585,7 +589,7 @@ def cycle(a):
     rows = analyse()
     print_top(rows, a.top)
     STATE["html"] = build_page(rows)
-    notify(rows, a.window)
+    notify(rows, a.window, a.each_run)
     soonest = min((r["end"] - time.time() for r in rows if r["end"] > time.time()), default=9e9)
     return 120 if soonest < 3600 else 300 if soonest < 86400 else a.every * 60
 
@@ -597,6 +601,7 @@ def main():
     ap.add_argument("--every", type=int, default=10, help="minutes between runs")
     ap.add_argument("--serve", type=int, default=0, metavar="PORT", help="run forever + web app on PORT")
     ap.add_argument("--once", action="store_true")
+    ap.add_argument("--each-run", action="store_true", help="send one digest per run (cron sets the cadence)")
     a = ap.parse_args()
     sys.stdout.reconfigure(encoding="utf8", errors="replace")
     if a.serve:
