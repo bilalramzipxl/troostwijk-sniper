@@ -546,7 +546,7 @@ def block(r, now):
     name = l["title"].replace("Laptop - ", "").replace("LENOVO", "Lenovo")
     return (f"{ICON.get(r['kind'], '')} #{lot_no(r)} {name}\n"
             f"{r['short']}\n"
-            f"Bod €{r['bid']:.0f} → max €{r['max_bid']:.0f} (waarde €{r['value']:.0f})\n"
+            f"Bod €{r['bid']:.0f} → max €{r['max_bid']:.0f} (waarde €{r['value']:.0f}) | betaalprijs €{r['bid'] * (1 + OVERHEAD):.0f}\n"
             f"Sluit {nl_time(r['end'])} · nog {nl_left(r['end'] - now)}")
 
 
