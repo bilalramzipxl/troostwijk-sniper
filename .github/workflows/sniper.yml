@@ -1,0 +1,34 @@
+name: sniper
+on:
+  schedule:
+    - cron: "*/5 * 3-5 11 *"   # every 5 min on 3-5 Nov (UTC), the last days of the auction
+  workflow_dispatch:
+    inputs:
+      window:
+        description: "alert for lots closing within N hours"
+        default: "48"
+concurrency:
+  group: sniper
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      TZ: Europe/Amsterdam
+      PYTHONUTF8: "1"
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: |
+            details_cache.json
+            prices_cache.json
+            alerted.json
+          key: sniper-state-${{ github.run_id }}
+          restore-keys: sniper-state-
+      - run: python sniper.py --once --window ${{ github.event.inputs.window || '48' }}
