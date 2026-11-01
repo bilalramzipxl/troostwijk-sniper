@@ -516,6 +516,22 @@ def push(title, msg, url, prio="default", actions=()):
             f"https://ntfy.sh/{topic()}", data=msg.encode("utf8"), headers=h), timeout=15)
     except Exception as e:
         print("  ntfy failed:", e)
+    discord(title, msg, url, actions)
+
+
+def discord(title, msg, url, actions=()):
+    """Post to a Discord channel webhook (DISCORD_WEBHOOK env, kept as a secret)."""
+    hook = os.environ.get("DISCORD_WEBHOOK")
+    if not hook:
+        return
+    links = " · ".join(f"[{n}]({u})" for n, u in actions) or f"[Open lot]({url})"
+    content = f"**{title}**\n{msg}\n{links}"[:1900]
+    try:
+        urllib.request.urlopen(urllib.request.Request(
+            hook, data=json.dumps({"content": content, "flags": 4}).encode("utf8"),  # flags 4: no link previews
+            headers={"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"}), timeout=15)
+    except Exception as e:
+        print("  discord failed:", e)
 
 
 def lot_no(r):

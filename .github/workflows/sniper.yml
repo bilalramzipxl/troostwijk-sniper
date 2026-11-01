@@ -19,6 +19,7 @@ jobs:
       TZ: Europe/Amsterdam
       PYTHONUTF8: "1"
       NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
