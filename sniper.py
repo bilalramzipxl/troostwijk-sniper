@@ -478,6 +478,7 @@ def topic():
     return cfg["ntfy_topic"]
 
 
+ICON_URL = "https://raw.githubusercontent.com/bilalramzipxl/troostwijk-sniper/main/assets/white-death.png"
 DAYS = ["ma", "di", "wo", "do", "vr", "za", "zo"]
 ICON = {"pc": "🖥️", "laptop": "💻", "gpu": "🎮", "server": "🗄️"}
 
@@ -508,7 +509,7 @@ def hdr(s):
 
 def push(title, msg, url, prio="default", actions=()):
     print("PUSH:", title, "\n" + msg, flush=True)
-    h = {"Title": hdr(title), "Click": url, "Priority": prio}
+    h = {"Title": hdr(title), "Click": url, "Priority": prio, "Icon": ICON_URL}
     if actions:
         h["Actions"] = "; ".join(f"view, {n}, {u}" for n, u in actions[:3])
     try:
@@ -528,7 +529,8 @@ def discord(title, msg, url, actions=()):
     content = f"**{title}**\n{msg}\n{links}"[:1900]
     try:
         urllib.request.urlopen(urllib.request.Request(
-            hook, data=json.dumps({"content": content, "flags": 4}).encode("utf8"),  # flags 4: no link previews
+            hook, data=json.dumps({"content": content, "flags": 4,  # flags 4: no link previews
+                             "username": "The White Death", "avatar_url": ICON_URL}).encode("utf8"),
             headers={"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"}), timeout=15)
     except Exception as e:
         print("  discord failed:", e)
