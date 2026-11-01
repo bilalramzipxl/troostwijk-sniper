@@ -21,7 +21,7 @@ CACHE = os.path.join(HERE, "details_cache.json")
 SEEN = os.path.join(HERE, "alerted.json")
 
 # Buyer's premium + VAT on the premium. CHECK the auction's terms and edit.
-BUYER_PREMIUM = 0.15
+BUYER_PREMIUM = 0.19  # "Veilingkosten" 19% of the bid, confirmed in a logged-in account
 VAT = 0.0  # you reclaim the VAT as a business buyer, so it is not a cost (set 0.21 if you can't)
 OVERHEAD = BUYER_PREMIUM * (1 + VAT)  # extra cost on top of the hammer price
 # You want to pay at most this share of the used resale value, all costs in.
